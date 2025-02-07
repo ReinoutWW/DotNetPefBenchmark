@@ -142,7 +142,9 @@ namespace DotNetPerfBenchmark
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Run<ZipCodeBenchmarks>();
+            //BenchmarkRunner.Run<ZipCodeBenchmarks>();
+            BenchmarkRunner.Run<StringManipulationBenchmarks>();
+            //BenchmarkRunner.Run<ConcurrentVsCollectionBenchmarks>();
         }
     }
 }
