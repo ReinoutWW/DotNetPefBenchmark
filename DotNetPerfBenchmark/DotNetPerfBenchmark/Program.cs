@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
@@ -29,7 +30,7 @@ namespace DotNetPerfBenchmark
         /// We fix the number of zip codes to 360,000 to reflect the user's scenario.
         /// If you want multiple test sizes, you can add more values in the Params array.
         /// </summary>
-        [Params(360000)]
+        [Params(1000, 360000)]
         public int Count { get; set; }
 
         private List<string> zipCodes;
@@ -59,7 +60,7 @@ namespace DotNetPerfBenchmark
         /// The result is returned just to prevent the JIT from optimizing it away.
         /// </summary>
         [Benchmark]
-        public List<string> CreateZipCodeList()
+        public List<string> S1_Create()
         {
             var localList = new List<string>(Count);
             for (int i = 0; i < Count; i++)
@@ -77,7 +78,7 @@ namespace DotNetPerfBenchmark
         /// in a new list, increasing CPU and memory usage.
         /// </summary>
         [Benchmark]
-        public List<string> ConcatZipCodes()
+        public List<string> S2_Conc()
         {
             var newList = new List<string>(Count);
             foreach (var zc in zipCodes)
@@ -89,37 +90,14 @@ namespace DotNetPerfBenchmark
         }
 
         /// <summary>
-        /// Scenario 3: Another manipulation, e.g. substring operation.
-        /// This simulates scanning or partially transforming each string,
-        /// which can add CPU overhead but not as much extra memory 
-        /// (since we aren't storing new strings in a list).
-        /// </summary>
-        [Benchmark]
-        public long SubstringZipCodes()
-        {
-            long totalLength = 0;
-            foreach (var zc in zipCodes)
-            {
-                // Just an example: if length is >3, we do a substring(0,3).
-                // Accumulate the total length for minimal overhead.
-                if (zc.Length > 3)
-                {
-                    string partial = zc.Substring(0, 3);
-                    totalLength += partial.Length;
-                }
-            }
-            return totalLength;
-        }
-        
-        /// <summary>
         /// Scenario 3: Perform a string concatenation operation
         /// on each zip code from the pre-built list (zipCodes).
         /// 
         /// This simulates adding extra data or formatting them
         /// in a new list, increasing CPU and memory usage.
         /// </summary>
-        [Benchmark]
-        public List<string> HeavyConcatZipCodes()
+        [Benchmark(Baseline = true)]
+        public List<string> S3_Conc()
         {
             var newList = new List<string>(Count);
             foreach (var zc in zipCodes)
@@ -129,6 +107,35 @@ namespace DotNetPerfBenchmark
             }
             return newList;
         }
+
+        /// <summary>
+        /// Scenario 4: Perform a string concatenation operation with a
+        /// stringbuilder on each zip code from the pre-built list (zipCodes).
+        /// 
+        /// This simulates adding extra data or formatting them
+        /// in a new list, increasing CPU and memory usage.
+        /// </summary>
+        [Benchmark]
+        public int S4_StrOpr()
+        {
+            int foundCount = 0;
+
+            // For demonstration, let's do 1,000 searches for different prefixes
+            // e.g. "0000", "0001", "0002", etc.
+            // Adjust how you see fit (random, or just a range).
+            for (int i = 0; i < 1000; i++)
+            {
+                string prefix = $"{i:D4}";
+
+                // E.g. find the first zip code that starts with "0023" or "0500", etc.
+                var found = zipCodes.FirstOrDefault(zc => zc.StartsWith(prefix));
+
+                if (found != null)
+                    foundCount++;
+            }
+
+            return foundCount;
+        }    
     }
 
     class Program
