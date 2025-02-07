@@ -7,6 +7,7 @@ namespace DotNetPerfBenchmark
 {
     [MemoryDiagnoser]            // Tracks memory allocation
     [MarkdownExporterAttribute.GitHub] // Exports results in GitHub-friendly Markdown
+    [Config(typeof(ConfigWithRPlot))]
     public class StringManipulationBenchmarks
     {
         // This parameter will control the size of the input strings

@@ -5,6 +5,7 @@ namespace DotNetPerfBenchmark
 {
     [MemoryDiagnoser]
     [MarkdownExporterAttribute.GitHub] 
+    [Config(typeof(ConfigWithRPlot))]
     public class ConcurrentVsCollectionBenchmarks
     {
         [Params(10, 100, 1000, 10_000, 100_000, 1_000_000)]
